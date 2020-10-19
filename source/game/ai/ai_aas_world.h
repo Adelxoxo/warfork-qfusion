@@ -259,9 +259,6 @@ class AiAasWorld
 
 	int *face2DProjVertexNums;     // Elements #i*2, #i*2+1 contain numbers of vertices of a 2d face proj for face #i
 
-	int *areaMapLeafListOffsets;    // An element #i contains an offset of leafs list data in the joint data
-	int *areaMapLeafsData;          // Contains area map (collision/vis) leafs lists, each one is prepended by the length
-
 	static AiAasWorld *instance;
 
 	AiAasWorld() {
@@ -286,8 +283,6 @@ class AiAasWorld
 	void ComputeLogicalAreaClusters();
     // Computes vertices of top 2D face projections
 	void ComputeFace2DProjVertices();
-	// Computes map (collision/vis) leafs for areas
-	void ComputeAreasLeafsLists();
 
 	void TrySetAreaLedgeFlags( int areaNum );
 	void TrySetAreaWallFlags( int areaNum );
@@ -467,11 +462,6 @@ public:
 	}
 
 	inline int *Face2DProjVertexNums() const { return face2DProjVertexNums; }
-
-	inline const int *AreaMapLeafsList( int areaNum ) const {
-		assert( areaNum >= 0 && areaNum < numareas );
-		return areaMapLeafsData + areaMapLeafListOffsets[areaNum];
-	}
 };
 
 #endif
