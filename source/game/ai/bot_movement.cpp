@@ -397,10 +397,6 @@ BotBaseMovementAction *BotMovementPredictionContext::GetCachedActionAndRecordFor
 		record_->botInput.SetIntendedLookDir( intendedLookVec );
 	}
 
-	auto prevRotationMask = (unsigned)prevPredictedAction->record.botInput.allowedRotationMask;
-	auto nextRotationMask = (unsigned)nextPredictedAction->record.botInput.allowedRotationMask;
-	record_->botInput.allowedRotationMask = (BotInputRotation)( prevRotationMask & nextRotationMask );
-
 	return nextPredictedAction->action;
 }
 
@@ -1734,9 +1730,7 @@ void BotDummyMovementAction::PlanPredictionStep( BotMovementPredictionContext *c
 		}
 	}
 
-	if( handledSpecialMovement ) {
-		botInput->SetAllowedRotationMask( BotInputRotation::NONE );
-	} else {
+	if( !handledSpecialMovement ) {
 		if( !nextReachNum || !context->NavTargetAasAreaNum() ) {
 			// Looks like the nav target is lost due to being high above the ground
 			if( entityPhysicsState.IsHighAboveGround() ) {
@@ -2706,9 +2700,6 @@ void BotLandOnSavedAreasMovementAction::PlanPredictionStep( BotMovementPredictio
 	} else if( dotForward > 0.5f ) {
 		botInput->SetForwardMovement( +1 );
 	}
-
-	// Disallow any input rotation while landing, it relies on a side aircontrol.
-	botInput->SetAllowedRotationMask( BotInputRotation::NONE );
 
 	botInput->isUcmdSet = true;
 
@@ -4616,8 +4607,6 @@ bool BotWalkOrSlideInterpolatingReachChainMovementAction::TrySetupCrouchSliding(
 	} else if( dotRight < -0.2f ) {
 		botInput->SetRightMovement( -1 );
 	}
-
-	botInput->SetAllowedRotationMask( BotInputRotation::NONE );
 
 	return true;
 }
