@@ -444,12 +444,8 @@ public:
 		return false;
 	}
 
-	inline bool AreaDisabled( int areaNum ) const {
+	inline bool AreaDisabled( int areaNum ) {
 		return areasDisabledStatus[areaNum].CurrStatus() || ( aasWorld.AreaSettings()[areaNum].areaflags & AREA_DISABLED );
-	}
-
-	inline bool AreaTemporarilyDisabled( int areaNum ) const {
-		return areasDisabledStatus[areaNum].CurrStatus();
 	}
 
 	struct DisableZoneRequest {
