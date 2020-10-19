@@ -911,34 +911,6 @@ public:
 	CachesStack<bool, MAX_PREDICTED_STATES> canSafelyKeepHighSpeedCachesStack;
 	StaticVector<BotEnvironmentTraceCache, MAX_PREDICTED_STATES> environmentTestResultsStack;
 
-	struct NearbyTriggersCache {
-		vec3_t lastComputedForMins;
-		vec3_t lastComputedForMaxs;
-
-		int numJumppadEnts;
-		int numTeleportEnts;
-		int numPlatformEnts;
-		int numOtherEnts;
-
-		static constexpr auto MAX_GROUP_ENTITIES = 12;
-		static constexpr auto MAX_OTHER_ENTITIES = 20;
-
-		uint16_t jumppadEntNums[MAX_GROUP_ENTITIES];
-		uint16_t teleportEntNums[MAX_GROUP_ENTITIES];
-		uint16_t platformEntNums[MAX_GROUP_ENTITIES];
-		uint16_t otherEntNums[MAX_OTHER_ENTITIES];
-
-		NearbyTriggersCache()
-			: numJumppadEnts( 0 ),
-			numTeleportEnts( 0 ),
-			numPlatformEnts( 0 ),
-			numOtherEnts( 0 ) {
-			// Set illegal bounds to force update on first access
-			ClearBounds( lastComputedForMins, lastComputedForMaxs );
-		}
-
-		void EnsureValidForBounds( const vec3_t absMins, const vec3_t absMaxs );
-	} nearbyTriggersCache;
 public:
 	BotMovementState *movementState;
 	BotMovementActionRecord *record;
@@ -963,11 +935,9 @@ public:
 	bool shouldRollback;
 
 	struct FrameEvents {
-		static constexpr auto MAX_TOUCHED_OTHER_TRIGGERS = 16;
-		// Not teleports, jumppads or platforms (usually items).
-		// Non-null classname is the only restriction applied.
-		uint16_t otherTouchedTriggerEnts[MAX_TOUCHED_OTHER_TRIGGERS];
-		int numOtherTouchedTriggers;
+		static constexpr auto MAX_TOUCHED_TRIGGERS = 32;
+		int touchedTriggerEnts[MAX_TOUCHED_TRIGGERS];
+		int numTouchedTriggers;
 
 		bool hasJumped: 1;
 		bool hasDashed: 1;
@@ -983,7 +953,7 @@ public:
 		}
 
 		inline void Clear() {
-			numOtherTouchedTriggers = 0;
+			numTouchedTriggers = 0;
 			hasJumped = false;
 			hasDashed = false;
 			hasWalljumped = false;
