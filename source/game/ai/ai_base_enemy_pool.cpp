@@ -51,15 +51,13 @@ void Enemy::Clear() {
 	lastSeenAt = 0;
 }
 
-void Enemy::OnViewed( const float *specifiedOrigin ) {
+void Enemy::OnViewed() {
 	if( lastSeenSnapshots.size() == MAX_TRACKED_POSITIONS ) {
 		lastSeenSnapshots.pop_front();
 	}
 
-	// Put the likely case first
-	const float *origin = !specifiedOrigin ? ent->s.origin : specifiedOrigin;
 	// Set members for faster access
-	VectorCopy( origin, lastSeenPosition.Data() );
+	VectorCopy( ent->s.origin, lastSeenPosition.Data() );
 	VectorCopy( ent->velocity, lastSeenVelocity.Data() );
 	lastSeenAt = level.time;
 	// Store in a queue then for history
@@ -546,44 +544,7 @@ void AiBaseEnemyPool::OnEnemyViewed( const edict_t *enemy ) {
 		trackedEnemiesCount++;
 	} else {
 		Debug( "has viewed a new enemy %s, all slots are used. Should try evict some slot\n", Nick( enemy ) );
-		TryPushNewEnemy( enemy, nullptr );
-	}
-}
-
-void AiBaseEnemyPool::OnEnemyOriginGuessed( const edict_t *enemy,
-											unsigned minMillisSinceLastSeen,
-											const float *guessedOrigin ) {
-	if( !enemy ) {
-		return;
-	}
-
-	const int64_t levelTime = level.time;
-	int freeSlot = -1;
-	for( unsigned i = 0; i < maxTrackedEnemies; ++i ) {
-		if( !trackedEnemies[i].ent ) {
-			freeSlot = i;
-			continue;
-		}
-		if( trackedEnemies[i].ent != enemy ) {
-			continue;
-		}
-		// If there is already an Enemy record containing an entity,
-		// check whether this record timed out enough to be overwritten.
-		// This code prevents overwriting
-		if( trackedEnemies[i].lastSeenAt + minMillisSinceLastSeen > levelTime ) {
-			continue;
-		}
-		trackedEnemies[i].OnViewed();
-		return;
-	}
-
-	if( freeSlot > 0 ) {
-		Debug( "has guessed a new origin for not seen enemy %s, uses a free slot to remember it\n", Nick( enemy ) );
-		EmplaceEnemy( enemy, freeSlot, guessedOrigin );
-		trackedEnemiesCount++;
-	} else {
-		Debug( "has guessed a new enemy %s, all slots are used. Should try to evict some slot\n", Nick( enemy ) );
-		TryPushNewEnemy( enemy, guessedOrigin );
+		TryPushNewEnemy( enemy );
 	}
 }
 
@@ -608,7 +569,7 @@ void AiBaseEnemyPool::RemoveEnemy( Enemy &enemy ) {
 	--trackedEnemiesCount;
 }
 
-void AiBaseEnemyPool::EmplaceEnemy( const edict_t *enemy, int slot, const float *specifiedOrigin ) {
+void AiBaseEnemyPool::EmplaceEnemy( const edict_t *enemy, int slot ) {
 	Enemy &slotEnemy = trackedEnemies[slot];
 	slotEnemy.ent = enemy;
 	slotEnemy.registeredAt = level.time;
@@ -616,11 +577,11 @@ void AiBaseEnemyPool::EmplaceEnemy( const edict_t *enemy, int slot, const float 
 	slotEnemy.avgPositiveWeight = 0.0f;
 	slotEnemy.maxPositiveWeight = 0.0f;
 	slotEnemy.positiveWeightsCount = 0;
-	slotEnemy.OnViewed( specifiedOrigin );
+	slotEnemy.OnViewed();
 	Debug( "has stored enemy %s in slot %d\n", slotEnemy.Nick(), slot );
 }
 
-void AiBaseEnemyPool::TryPushEnemyOfSingleBot( const edict_t *bot, const edict_t *enemy, const float *specifiedOrigin ) {
+void AiBaseEnemyPool::TryPushEnemyOfSingleBot( const edict_t *bot, const edict_t *enemy ) {
 	// Try to find a free slot. For each used and not reserved slot compute eviction score relative to new enemy
 	int candidateSlot = -1;
 
@@ -630,12 +591,7 @@ void AiBaseEnemyPool::TryPushEnemyOfSingleBot( const edict_t *bot, const edict_t
 	// Significantly increases chances to get a slot, but not guarantees it.
 	bool isNewEnemyAttacker = LastAttackedByTime( enemy ) > 0;
 	// It will be useful inside the loop, so it needs to be precomputed
-	float distanceToNewEnemy;
-	if( !specifiedOrigin ) {
-		distanceToNewEnemy = ( Vec3( bot->s.origin ) - enemy->s.origin ).LengthFast();
-	} else {
-		distanceToNewEnemy = DistanceFast( bot->s.origin, specifiedOrigin );
-	}
+	float distanceToNewEnemy = ( Vec3( bot->s.origin ) - enemy->s.origin ).LengthFast();
 	float newEnemyWeight = ComputeRawEnemyWeight( enemy );
 
 	for( unsigned i = 0; i < maxTrackedEnemies; ++i ) {
@@ -696,7 +652,7 @@ void AiBaseEnemyPool::TryPushEnemyOfSingleBot( const edict_t *bot, const edict_t
 
 	if( candidateSlot != -1 ) {
 		Debug( "will evict %s to make a free slot, new enemy have higher priority atm\n", Nick( enemy ) );
-		EmplaceEnemy( enemy, candidateSlot, specifiedOrigin );
+		EmplaceEnemy( enemy, candidateSlot );
 	} else {
 		Debug( "can't find free slot for %s, all current enemies have higher priority\n", Nick( enemy ) );
 	}
