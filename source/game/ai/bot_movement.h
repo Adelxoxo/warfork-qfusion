@@ -1247,7 +1247,6 @@ protected:
 	bool stopPredictionOnTouchingPlatform;
 	bool stopPredictionOnTouchingNavEntity;
 	bool stopPredictionOnEnteringWater;
-	bool failPredictionOnEnteringDangerImpactZone;
 
 	inline BotBaseMovementAction &DummyAction();
 	inline BotBaseMovementAction &DefaultWalkAction();
@@ -1301,8 +1300,7 @@ public:
 		stopPredictionOnTouchingTeleporter( true ),
 		stopPredictionOnTouchingPlatform( true ),
 		stopPredictionOnTouchingNavEntity( true ),
-		stopPredictionOnEnteringWater( true ),
-		failPredictionOnEnteringDangerImpactZone( true ) {
+		stopPredictionOnEnteringWater( true ) {
 		RegisterSelf();
 	}
 	virtual void PlanPredictionStep( BotMovementPredictionContext *context ) = 0;
