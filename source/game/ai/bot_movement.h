@@ -13,7 +13,7 @@ class alignas ( 2 )AiCampingSpot
 	short lookAtPoint[3];
 	unsigned char radius;
 	unsigned char alertness : 7;
-	AiCampingSpot() : radius( 32 ), alertness( 127 ), hasLookAtPoint( false ) {}
+	AiCampingSpot() = default;
 
 public:
 	bool hasLookAtPoint : 1;
