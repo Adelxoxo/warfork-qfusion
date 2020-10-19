@@ -513,7 +513,8 @@ void Bot::CheckAlertSpots( const StaticVector<uint16_t, MAX_CLIENTS> &visibleTar
 		// Get a square root of score (values closer to 0 gets scaled more than ones closer to 1)
 		score = 1.0f / Q_RSqrt( score + 0.001f );
 		// Sanitize
-		scores[i] = bound( score, 0.0f, 1.0f );
+		clamp( score, 0.0f, 1.0f );
+		scores[i] = score;
 	}
 
 	// Then call callbacks

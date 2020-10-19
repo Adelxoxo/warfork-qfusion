@@ -259,7 +259,8 @@ public:
 	float GetEffectiveOffensiveness() const;
 
 	inline void SetBaseOffensiveness( float baseOffensiveness_ ) {
-		this->baseOffensiveness = Clamp( baseOffensiveness_, 0.0f, 1.0f );
+		this->baseOffensiveness = baseOffensiveness_;
+		clamp( this->baseOffensiveness, 0.0f, 1.0f );
 	}
 
 	inline void ClearOverriddenEntityWeights() {
