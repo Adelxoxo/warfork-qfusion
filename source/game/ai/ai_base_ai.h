@@ -17,20 +17,18 @@ class alignas ( 4 )AiEntityPhysicsState
 	// These fields are accessed way too often, so packing benefits does not outweigh unpacking performance loss.
 	vec3_t origin;
 	vec3_t velocity;
-	float speed;
-	float speed2D;
 	// Unpacking of these fields is much cheaper than calling AngleVectors() that uses the expensive fsincos instruction
 	// 12 bytes totally
-	int16_t forwardDir[3];
-	int16_t rightDir[3];
+	signed short forwardDir[3];
+	signed short rightDir[3];
 
-	inline static void SetPackedDir( const vec3_t dir, int16_t *result ) {
+	inline static void SetPackedDir( const vec3_t dir, signed short *result ) {
 		// Do not multiply by the exact 2 ^ 15 value, leave some space for vector components slightly > 1.0f
 		result[0] = (signed short)( dir[0] * 30000 );
 		result[1] = (signed short)( dir[1] * 30000 );
 		result[2] = (signed short)( dir[2] * 30000 );
 	}
-	inline static Vec3 UnpackedDir( const int16_t *packedDir ) {
+	inline static Vec3 UnpackedDir( const signed short *packedDir ) {
 		float scale = 1.0f / 30000;
 		return Vec3( scale * packedDir[0], scale * packedDir[1], scale * packedDir[2] );
 	}
@@ -38,32 +36,47 @@ class alignas ( 4 )AiEntityPhysicsState
 public:
 	// CONTENTS flags, cannot be compressed
 	int waterType;
+
 private:
-	int16_t angles[3];
-	static_assert( MAX_EDICTS < ( 1 << 15 ), "Fields bits count assumes 2^15 as game entities count limit" );
-	// Use a signed type for indicating an absent ground entity by a negative value
-	int16_t groundEntNum;
-	uint16_t selfEntNum;
+	signed short angles[3];
+	static_assert( MAX_EDICTS == ( 1 << 10 ), "Fields bits count assumes 1024 as game entities count limit" );
+	// Add an extra bit for -1 entity num sign
+	short groundEntNum : 11;
+	unsigned short selfEntNum : 10;
 	// This needs some precision (can be used to restore trace fraction if needed), so its packed into 2 bytes
-	uint16_t heightOverGround;
+	unsigned short heightOverGround;
 
 	inline void SetHeightOverGround( float heightOverGround_ ) {
 		if( heightOverGround_ <= GROUND_TRACE_DEPTH ) {
-			this->heightOverGround = ( uint16_t )( heightOverGround_ * 256 );
+			this->heightOverGround = ( decltype( this->heightOverGround ) )( heightOverGround_ * 256 );
 		} else {
-			this->heightOverGround = ( uint16_t )( ( GROUND_TRACE_DEPTH + 1 ) * 256 + 1 );
+			this->heightOverGround = ( decltype( this->heightOverGround ) )( ( GROUND_TRACE_DEPTH + 1 ) * 256 + 1 );
 		}
 	}
 
+public:
+	signed char droppedToFloorOriginOffset;
+
 private:
-	uint16_t currAasAreaNum;
-	uint16_t droppedToFloorAasAreaNum;
+	unsigned currAasAreaNum : 20;
+	unsigned droppedToFloorAasAreaNum : 20;
+	unsigned speed : 18;
+	unsigned speed2D : 18;
 
 	inline void SetSpeed( const vec3_t velocity_ ) {
 		float squareSpeed2D = velocity_[0] * velocity_[0] + velocity_[1] * velocity_[1];
 		float squareSpeed = squareSpeed2D + velocity_[2] * velocity_[2];
-		this->speed = squareSpeed > 0.001f ? sqrtf( squareSpeed ) : 0;
-		this->speed2D = squareSpeed2D > 0.001f ? sqrtf( squareSpeed2D ) : 0;
+		// If a square value is very low, leave it as-is
+		if( squareSpeed > 0.001f ) {
+			this->speed = ( decltype( this->speed ) )( sqrtf( squareSpeed ) * 16.0f );
+		} else {
+			this->speed = ( decltype( this->speed ) )( squareSpeed * 16.0f );
+		}
+		if( squareSpeed2D > 0.001f ) {
+			this->speed2D = ( decltype( this->speed2D ) )( sqrtf( squareSpeed2D ) * 16.0f );
+		} else {
+			this->speed2D = ( decltype( this->speed2D ) )( squareSpeed2D * 16.0f );
+		}
 	}
 
 	inline void UpdateDirs( const vec3_t angles_ ) {
@@ -76,19 +89,18 @@ private:
 	void UpdateAreaNums();
 
 public:
-	int8_t droppedToFloorOriginOffset;
-	uint8_t waterLevel;
+	unsigned short waterLevel : 2;
 
 	AiEntityPhysicsState()
-		: speed( 0 ),
-		speed2D( 0 ),
-		waterType( 0 ),
+		: waterType( 0 ),
 		groundEntNum( 0 ),
 		selfEntNum( 0 ),
 		heightOverGround( 0 ),
+		droppedToFloorOriginOffset( 0 ),
 		currAasAreaNum( 0 ),
 		droppedToFloorAasAreaNum( 0 ),
-		droppedToFloorOriginOffset( 0 ),
+		speed( 0 ),
+		speed2D( 0 ),
 		waterLevel( 0 ) {}
 
 	inline void UpdateFromEntity( const edict_t *ent ) {
@@ -99,9 +111,9 @@ public:
 		SetAngles( ent->s.angles );
 		this->groundEntNum = -1;
 		if( ent->groundentity ) {
-			this->groundEntNum = ( decltype( this->groundEntNum ) )( ENTNUM( ent->groundentity ) );
+			this->groundEntNum = ( decltype( this->groundEntNum ) )( ENTNUM( const_cast<edict_t *>( ent->groundentity ) ) );
 		}
-		this->selfEntNum = ( decltype( this->selfEntNum ) )ENTNUM( ent );
+		this->selfEntNum = ( decltype( this->selfEntNum ) )ENTNUM( const_cast<edict_t *>( ent ) );
 
 		UpdateAreaNums();
 	}
@@ -168,8 +180,9 @@ public:
 	}
 	inline void SetVelocity( const Vec3 &velocity_ ) { SetVelocity( velocity_.Data() ); }
 
-	inline float Speed() const { return speed; }
-	inline float Speed2D() const { return speed2D; }
+	// Note: there might be mismatch with an actual value computed from the velocity
+	inline float Speed() const { return speed / 16.0f; }
+	inline float Speed2D() const { return speed2D / 16.0f; }
 	// These getters are provided for compatibility with the other code
 	inline float SquareSpeed() const {
 		float unpackedSpeed = Speed();
