@@ -135,7 +135,7 @@ bool WorldState::IsSatisfiedBy( const WorldState &that ) const {
 			return false;
 		}
 
-		const float epsilon = packed.epsilon * 4.0f;
+		const unsigned short epsilon = packed.epsilon;
 		const short *thisOriginData = originVarsData + offset;
 		const short *thatOriginData = that.originVarsData + offset;
 
