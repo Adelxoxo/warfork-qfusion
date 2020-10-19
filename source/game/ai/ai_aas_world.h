@@ -257,8 +257,6 @@ class AiAasWorld
 	uint16_t *floorClusterData;    // Contains floor clusters element sequences, each one is prepended by the length
 	uint16_t *stairsClusterData;    // Contains stairs clusters element sequences, each one is prepended by the length
 
-	int *face2DProjVertexNums;     // Elements #i*2, #i*2+1 contain numbers of vertices of a 2d face proj for face #i
-
 	static AiAasWorld *instance;
 
 	AiAasWorld() {
@@ -281,8 +279,6 @@ class AiAasWorld
 	void ComputeExtraAreaData();
 	// Computes extra Qfusion area floor and stairs clusters
 	void ComputeLogicalAreaClusters();
-    // Computes vertices of top 2D face projections
-	void ComputeFace2DProjVertices();
 
 	void TrySetAreaLedgeFlags( int areaNum );
 	void TrySetAreaWallFlags( int areaNum );
@@ -440,14 +436,10 @@ public:
 		return loaded ? areaFloorClusterNums[areaNum] : (uint16_t)0;
 	}
 
-	inline uint16_t *AreaFloorClusterNums() const { return areaFloorClusterNums; }
-
 	// A feasible cluster num is non-zero
 	inline uint16_t StairsClusterNum( int areaNum ) const {
 		return loaded ? areaStairsClusterNums[areaNum] : (uint16_t)0;
 	}
-
-	inline uint16_t *AreaStairsClusterNums() const { return areaStairsClusterNums; }
 
 	// In order to be conform with the rest of AAS code the zero cluster is dummy
 	inline const uint16_t *FloorClusterData( int floorClusterNum ) const {
@@ -460,8 +452,6 @@ public:
 		assert( stairsClusterNum >= 0 && stairsClusterNum < numStairsClusters );
 		return stairsClusterData + stairsClusterDataOffsets[stairsClusterNum];
 	}
-
-	inline int *Face2DProjVertexNums() const { return face2DProjVertexNums; }
 };
 
 #endif

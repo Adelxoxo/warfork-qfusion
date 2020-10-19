@@ -803,7 +803,7 @@ struct BotMovementPredictionConstants {
 
 class BotSameFloorClusterAreasCache
 {
-	typedef StaticVector<AreaAndScore, 48> CandidateAreasHeap;
+	typedef StaticVector<AreaAndScore, 16> CandidateAreasHeap;
 
 	// If a bot remains in the same area, candidates computation might be skipped,
 	// and only straight-line walkability tests are to be performed.
@@ -818,7 +818,9 @@ class BotSameFloorClusterAreasCache
 	mutable int computedTargetAreaNum;
 	mutable int computedTravelTime;
 
-	bool IsAreaWalkableInFloorCluster( int startAreaNum, int targetAreaNum ) const;
+	bool IsAreaWalkable( BotMovementPredictionContext *context,
+						 const aas_area_t &startArea,
+						 const aas_area_t &testedArea ) const;
 
 	void BuildCandidateAreasHeap( BotMovementPredictionContext *context,
 								  const uint16_t *clusterAreaNums,
