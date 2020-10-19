@@ -16,7 +16,7 @@ class GenericFireDef
 	short weaponNum;
 	bool isBuiltin;
 
-	GenericFireDef() = default;
+	GenericFireDef() {}
 
 public:
 	GenericFireDef( int weaponNum_, const firedef_t *builtinFireDef ) {
@@ -107,11 +107,7 @@ class SelectedEnemies
 #endif
 	}
 
-	explicit SelectedEnemies( const edict_t *self_ )
-		: self( self_ ),
-        primaryEnemy( nullptr ),
-        timeoutAt( 0 ),
-        instanceId( 0 ) {}
+	SelectedEnemies( const edict_t *self_ ) : self( self_ ) {}
 
 public:
 	bool AreValid() const;

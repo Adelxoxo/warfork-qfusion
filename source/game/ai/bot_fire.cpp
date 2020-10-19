@@ -90,14 +90,12 @@ void Bot::FireWeapon( BotInput *input ) {
 	AimParams *aimParams;
 	if( selectedWeapons.PreferBuiltinWeapon() ) {
 		aimParams = &builtinWeaponAimParams;
-		assert( builtinFireDef );
 		primaryFireDef = builtinFireDef;
 		if( scriptFireDef ) {
 			secondaryFireDef = scriptFireDef;
 		}
 	} else {
 		aimParams = &scriptWeaponAimParams;
-		assert( scriptFireDef );
 		primaryFireDef = scriptFireDef;
 		if( builtinFireDef ) {
 			secondaryFireDef = builtinFireDef;
