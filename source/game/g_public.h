@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // g_public.h -- game dll information visible to server
 
-#define GAME_API_VERSION    51
+#define GAME_API_VERSION    50
 
 //===============================================================
 
@@ -49,7 +49,6 @@ typedef struct {
 
 	int num_clusters;           // if -1, use headnode instead
 	int clusternums[MAX_ENT_CLUSTERS];
-	int leafnums[MAX_ENT_CLUSTERS];
 	int headnode;               // unused if num_clusters != -1
 	int areanum, areanum2;
 
@@ -114,7 +113,6 @@ typedef struct {
 	int ( *CM_BoxLeafnums )( vec3_t mins, vec3_t maxs, int *list, int listsize, int *topnode );
 	int ( *CM_LeafCluster )( int leafnum );
 	int ( *CM_LeafArea )( int leafnum );
-	int ( *CM_LeafsInPVS )( int leafnum1, int leafnum2 );
 
 	// managed memory allocation
 	void *( *Mem_Alloc )( size_t size, const char *filename, int fileline );

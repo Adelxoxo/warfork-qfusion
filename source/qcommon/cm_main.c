@@ -891,25 +891,19 @@ int CM_MergeVisSets( cmodel_state_t *cms, const vec3_t org, uint8_t *pvs, uint8_
 * Also checks portalareas so that doors block sight
 */
 bool CM_InPVS( cmodel_state_t *cms, const vec3_t p1, const vec3_t p2 ) {
-	int leafnum1, leafnum2;
-
-	leafnum1 = CM_PointLeafnum( cms, p1 );
-	leafnum2 = CM_PointLeafnum( cms, p2 );
-
-	return CM_LeafsInPVS( cms, leafnum1, leafnum2 );
-}
-
-bool CM_LeafsInPVS( cmodel_state_t *cms, int leafnum1, int leafnum2 ) {
+	int leafnum;
 	int cluster;
 	int area1, area2;
 	uint8_t *mask;
 
-	cluster = CM_LeafCluster( cms, leafnum1 );
-	area1 = CM_LeafArea( cms, leafnum1 );
+	leafnum = CM_PointLeafnum( cms, p1 );
+	cluster = CM_LeafCluster( cms, leafnum );
+	area1 = CM_LeafArea( cms, leafnum );
 	mask = CM_ClusterPVS( cms, cluster );
 
-	cluster = CM_LeafCluster( cms, leafnum2 );
-	area2 = CM_LeafArea( cms, leafnum2 );
+	leafnum = CM_PointLeafnum( cms, p2 );
+	cluster = CM_LeafCluster( cms, leafnum );
+	area2 = CM_LeafArea( cms, leafnum );
 
 	if( ( !( mask[cluster >> 3] & ( 1 << ( cluster & 7 ) ) ) ) ) {
 		return false;
