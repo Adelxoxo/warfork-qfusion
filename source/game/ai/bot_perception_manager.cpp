@@ -247,14 +247,14 @@ class PlasmaBeam
 		: startProjectile( nullptr ),
 		endProjectile( nullptr ),
 		owner( nullptr ),
-		damage( 0.0f ) {}
+		projectilesCount( 0 ) {}
 
 public:
 	PlasmaBeam( const edict_t *firstProjectile )
 		: startProjectile( firstProjectile ),
 		endProjectile( firstProjectile ),
 		owner( game.edicts + firstProjectile->s.ownerNum ),
-		damage( firstProjectile->projectileInfo.maxDamage ) {}
+		projectilesCount( 1 ) {}
 
 	const edict_t *startProjectile;
 	const edict_t *endProjectile;
@@ -263,7 +263,7 @@ public:
 	inline Vec3 start() { return Vec3( startProjectile->s.origin ); }
 	inline Vec3 end() { return Vec3( endProjectile->s.origin ); }
 
-	float damage;
+	int projectilesCount;
 
 	inline void AddProjectile( const edict_t *nextProjectile ) {
 		endProjectile = nextProjectile;
@@ -271,7 +271,7 @@ public:
 		if( owner != nextProjectile->r.owner ) {
 			owner = nullptr;
 		}
-		damage += nextProjectile->projectileInfo.maxDamage;
+		projectilesCount++;
 	}
 };
 
@@ -470,6 +470,7 @@ void PlasmaBeamsBuilder::FindMostDangerousBeams() {
 	}
 
 	const auto *weaponDef = GS_GetWeaponDef( WEAP_PLASMAGUN );
+	const float plasmaDamage = 0.5f * ( weaponDef->firedef.damage + weaponDef->firedef_weak.damage );
 	const float splashRadius = 1.2f * 0.5f * ( weaponDef->firedef.splash_radius + weaponDef->firedef_weak.splash_radius );
 	float minDamageScore = 0.0f;
 
@@ -513,7 +514,7 @@ void PlasmaBeamsBuilder::FindMostDangerousBeams() {
 
 			// Direct hit
 			if( bot == game.edicts + trace.ent ) {
-				float damageScore = beam->damage;
+				float damageScore = beam->projectilesCount * plasmaDamage;
 				if( damageScore > minDamageScore ) {
 					if( perceptionManager->TryAddDanger( damageScore, trace.endpos, beamsList.avgDirection.Data(), beam->owner ) ) {
 						minDamageScore = damageScore;
@@ -525,7 +526,8 @@ void PlasmaBeamsBuilder::FindMostDangerousBeams() {
 			// Splash hit
 			float hitVecLen = botOrigin.FastDistanceTo( trace.endpos );
 			if( hitVecLen < splashRadius ) {
-				float damageScore = beam->damage * ( 1.0f - hitVecLen / splashRadius );
+				// We treat up to 3 projectiles as a single explosion cluster (other projectiles are still flying)
+				float damageScore = std::max( 3, beam->projectilesCount ) * ( 1.0f - hitVecLen / splashRadius );
 				if( damageScore > minDamageScore ) {
 					if( perceptionManager->TryAddDanger( damageScore, trace.endpos, beamsList.avgDirection.Data(), beam->owner ) ) {
 						minDamageScore = damageScore;
@@ -539,8 +541,12 @@ void PlasmaBeamsBuilder::FindMostDangerousBeams() {
 BotPerceptionManager::BotPerceptionManager( edict_t *self_ )
 	: entitiesDetector( self_ ),
 	self( self_ ),
+	rocketDangersPool( "rocket dangers pool" ),
+	plasmaBeamDangersPool( "plasma beam dangers pool" ),
+	grenadeDangersPool( "grenade dangers pool" ),
+	blastDangersPool( "blast dangers pool" ),
+	laserBeamsPool( "laser beams pool" ),
 	primaryDanger( nullptr ),
-	dangersPool( "dangersPool" ),
 	jumppadUsersTracker( this ) {
 	SetupEventHandlers();
 }
@@ -553,7 +559,7 @@ bool BotPerceptionManager::TryAddDanger( float damageScore, const vec3_t hitPoin
 		}
 	}
 
-	if( Danger *danger = dangersPool.New() ) {
+	if( Danger *danger = plasmaBeamDangersPool.New() ) {
 		danger->damage = damageScore;
 		danger->hitPoint.Set( hitPoint );
 		danger->direction.Set( direction );
@@ -596,21 +602,24 @@ void BotPerceptionManager::Think() {
 	ResetTeammatesVisData();
 
 	if( !entitiesDetector.dangerousRockets.empty() ) {
-		FindProjectileDangers( entitiesDetector.dangerousRockets );
+		const auto &def = GS_GetWeaponDef( WEAP_ROCKETLAUNCHER );
+		FindProjectileDangers( entitiesDetector.dangerousRockets, 1.35f * def->firedef.splash_radius, def->firedef.damage );
 		TryGuessingProjectileOwnersOrigins( entitiesDetector.dangerousRockets, 0.0f );
 	}
 
 	TryGuessingProjectileOwnersOrigins( entitiesDetector.visibleOtherRockets, 0.0f );
 
 	if( !entitiesDetector.dangerousBlasts.empty() ) {
-		FindProjectileDangers( entitiesDetector.dangerousBlasts );
+		const auto &def = GS_GetWeaponDef( WEAP_GUNBLADE );
+		FindProjectileDangers( entitiesDetector.dangerousBlasts, 1.20f * def->firedef.splash_radius, def->firedef.damage );
 		TryGuessingProjectileOwnersOrigins( entitiesDetector.dangerousBlasts, 0.0f );
 	}
 
 	TryGuessingProjectileOwnersOrigins( entitiesDetector.visibleOtherBlasts, 0.0f );
 
 	if( !entitiesDetector.dangerousGrenades.empty() ) {
-		FindProjectileDangers( entitiesDetector.dangerousGrenades );
+		const auto &def = GS_GetWeaponDef( WEAP_GRENADELAUNCHER );
+		FindProjectileDangers( entitiesDetector.dangerousGrenades, 1.75f * def->firedef.splash_radius, def->firedef.damage );
 		TryGuessingProjectileOwnersOrigins( entitiesDetector.dangerousGrenades, 0.0f );
 	}
 
@@ -699,7 +708,7 @@ void BotPerceptionManager::FindLaserDangers( const EntNumsVector &entNums ) {
 	}
 }
 
-void BotPerceptionManager::FindProjectileDangers( const EntNumsVector &entNums ) {
+void BotPerceptionManager::FindProjectileDangers( const EntNumsVector &entNums, float dangerRadius, float damageScale ) {
 	trace_t trace;
 	float minPrjFraction = 1.0f;
 	float minDamageScore = 0.0f;
@@ -716,11 +725,11 @@ void BotPerceptionManager::FindProjectileDangers( const EntNumsVector &entNums )
 
 		minPrjFraction = trace.fraction;
 		float hitVecLen = botOrigin.FastDistanceTo( trace.endpos );
-		if( hitVecLen >= 1.25f * target->projectileInfo.radius ) {
+		if( hitVecLen >= dangerRadius ) {
 			continue;
 		}
 
-		float damageScore = 1.0f - hitVecLen / ( 1.25f * target->projectileInfo.radius );
+		float damageScore = 1.0f - hitVecLen / dangerRadius;
 		if( damageScore <= minDamageScore ) {
 			continue;
 		}
