@@ -654,7 +654,6 @@ private:
 	TraceResult results[16];
 	unsigned resultsMask;
 	bool didAreaTest;
-	bool hasNoFullHeightObstaclesAround;
 
 	template <typename T>
 	static inline void Assert( T condition ) {
@@ -741,11 +740,9 @@ public:
 		return ResultForIndex( JumpableHeightMask( BACK_RIGHT ), 15 );
 	}
 
-	inline BotEnvironmentTraceCache() : resultsMask( 0 ), didAreaTest( false ), hasNoFullHeightObstaclesAround( false ) {}
+	inline BotEnvironmentTraceCache() : resultsMask( 0 ), didAreaTest( false ) {}
 
 	void TestForResultsMask( class BotMovementPredictionContext *context, unsigned requiredResultsMask );
-
-	bool CanSkipPMoveCollision( class BotMovementPredictionContext *context );
 
 	inline ObstacleAvoidanceResult TryAvoidJumpableObstacles( class BotMovementPredictionContext *context,
 																  Vec3 *intendedLookVec, float correctionFraction ) {
