@@ -37,7 +37,7 @@ inline void PoolBase::Unlink( int16_t itemIndex, int16_t listIndex ) {
 		}
 	} else { // An item is a list head
 		if( listFirst[listIndex] != itemIndex ) {
-			AI_FailWith( "PoolBase::Unlink()", "An item is expected to be a list head but it isn't\n" );
+			abort();
 		}
 		if( links.Next() >= 0 ) {
 			ItemLinks &nextItem = ItemLinksAt( links.Next() );
@@ -294,7 +294,7 @@ struct PlannerNodesHashSet {
 		} else {
 #ifndef PUBLIC_BUILD
 			if( bins[binIndex] != node ) {
-				AI_FailWith( "PlannerNodesHashSet::RemoveNode()", "A node is expected to be a bin head but it isn't\n" );
+				abort();
 			}
 #endif
 			if( node->nextInHashBin ) {
@@ -334,13 +334,13 @@ public:
 	void Add( PlannerNode *node ) {
 #ifndef _DEBUG
 		if( PlannerNode *sameWorldStateNode = SameWorldStateNode( node ) ) {
-			AI_Debug( "PlannerNodesHashSet::Add()", "A node that contains same world state is already present\n" );
+			AI_Debug( "PlannerNodesHashSet::Add()", "A node that contains same world state is already present" );
 			// This helps to discover broken equality operators
 			node->worldState.DebugPrint( "Arg node" );
 			sameWorldStateNode->worldState.DebugPrint( "Same WS Node" );
-			AI_Debug( "PlannerNodesHashSet::Add()", "Arg node diff with the same WS node is:\n" );
+			AI_Debug( "PlannerNodesHashSet::Add()", "Arg node tho the same WS node diff is:" );
 			node->worldState.DebugPrintDiff( sameWorldStateNode->worldState, "Node", "Same WS Node" );
-			AI_FailWith( "PlannedNodesHashSet::Add()", "A bug has been detected\n" );
+			abort();
 		}
 #endif
 		unsigned binIndex = node->worldStateHash % N;
@@ -365,9 +365,9 @@ public:
 
 			return RemoveNode( binNode, binIndex );
 		}
-		AI_Debug( "PlannerNodesHashSet::RemoveBySameWorldState()", "Can't find a node that has same world state\n" );
+		AI_Debug( "PlannerNodesHashSet::RemoveBySameWorldState()", "Can't find a node that has same world state" );
 		node->worldState.DebugPrint( "Arg node" );
-		AI_FailWith( "PlannerNodesHashSet::RemoveBySameWorldState()", "A bug has been detected\n" );
+		abort();
 	}
 };
 
@@ -523,7 +523,7 @@ AiBaseActionRecord *AiBaseBrain::BuildPlan( AiBaseGoal *goal, const WorldState &
 			if( isInOpen && isInClosed ) {
 				Debug( "A world state was in OPEN and CLOSED sets simultaneously\n" );
 				currNode->worldState.DebugPrint( "WorldState" );
-				FailWith( "A bug has been detected\n" );
+				abort();
 			}
 
 			const bool wasInOpen = isInOpen;

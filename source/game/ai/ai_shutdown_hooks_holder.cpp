@@ -1,6 +1,8 @@
 #include "ai_shutdown_hooks_holder.h"
 #include "ai_local.h"
 
+#define TAG "AiShutdownHooksHolder::"
+
 static AiShutdownHooksHolder aiShutdownHooksHolderInstance;
 
 AiShutdownHooksHolder *AiShutdownHooksHolder::Instance() {
@@ -14,8 +16,9 @@ void AiShutdownHooksHolder::RegisterHook( const std::function<void(void)> &hook 
 void AiShutdownHooksHolder::RegisterHook( uint64_t tag, const std::function<void(void)> &hook ) {
 	for( const auto &tagAndHook: taggedHooks ) {
 		if( tagAndHook.first == tag ) {
-			const char *format = "Some hook tagged by %p is already present\n";
-			AI_FailWith( "AiShutdownHooksHolder::RegisterHook()", format, (const void *)tagAndHook.first );
+			const char *format = S_COLOR_RED TAG "RegisterHook(): some hook tagged by %p is already present\n";
+			G_Printf( format, (const void *)tagAndHook.first );
+			abort();
 		}
 	}
 	taggedHooks.push_back( std::make_pair( tag, hook ) );
@@ -29,12 +32,14 @@ void AiShutdownHooksHolder::UnregisterHook( uint64_t tag ) {
 		}
 	}
 
-	AI_FailWith( "AiShutdownHooksHolder::UnregisterHook()", "Can't find a hook by tag %p\n", (const void *)tag );
+	G_Printf( S_COLOR_RED TAG "UnregisterHook(): can't find a hook by tag %p\n", (const void *)tag );
+	abort();
 }
 
 void AiShutdownHooksHolder::InvokeHooks() {
 	if( hooksInvoked ) {
-		AI_FailWith( "AiShutdownHooksHolder::InvokeHooks()", "Hooks have been already invoked\n" );
+		G_Printf( S_COLOR_RED TAG "InvokeHooks(): Hooks have been already invoked\n" );
+		abort();
 	} else {
 		for( const auto &hook: untaggedHooks )
 			hook();
@@ -47,6 +52,7 @@ void AiShutdownHooksHolder::InvokeHooks() {
 
 AiShutdownHooksHolder::~AiShutdownHooksHolder() {
 	if( !hooksInvoked ) {
-		AI_FailWith( "AiShutdownHooksHolder::~AiShutdownHooksHolder()", "Hooks have not been invoked\n" );
+		G_Printf( S_COLOR_RED TAG "~AiShutdownHooksHolder(): Hooks have not been invoked\n" );
+		abort();
 	}
 }

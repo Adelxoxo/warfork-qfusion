@@ -11,10 +11,12 @@ int CachedTravelTimesMatrix::GetAASTravelTime( const edict_t *client1, const edi
 
 #ifdef _DEBUG
 	if( client1Num <= 0 || client1Num > gs.maxclients ) {
-		AI_FailWith( "CachedTravelTimesMatrix::GetAASTravelTime()", "Entity `client1` #%d is not a client\n", client1Num );
+		AI_Debug( "CachedTravelTimesMatrix", "Entity `client1` #%d is not a client\n", client1Num );
+		abort();
 	}
 	if( client2Num <= 0 || client2Num > gs.maxclients ) {
-		AI_FailWith( "CachedTravelTimesMatrix::GetAASTravelTime()", "Entity `client2` #%d is not a client\n", client2Num );
+		AI_Debug( "CachedTravelTimesMatrix", "Entity `client2` #%d is not a client\n", client2Num );
+		abort();
 	}
 #endif
 	int index = client1Num * MAX_CLIENTS + client2Num;
@@ -961,12 +963,14 @@ void AiSquad::PrepareToAddBots() {
 void AiSquad::AddBot( Bot *bot ) {
 #ifdef _DEBUG
 	if( !inUse || !isValid ) {
-		AI_FailWith( "AiSquad::AddBot()", "Can't add a bot to a unused or invalid squad\n" );
+		AI_Debug( "AiSquad", "Can't add a bot to a unused or invalid squad\n" );
+		abort();
 	}
 
 	for( const Bot *presentBot: bots ) {
 		if( presentBot == bot ) {
-			AI_FailWith( "AiSquad::AddBot()", "Can't add a bot to the squad (it is already present)\n" );
+			AI_Debug( "AiSquad", "Can't add a bot to the squad (it is already present)\n" );
+			abort();
 		}
 	}
 #endif
@@ -987,7 +991,8 @@ bool AiSquad::MayAttachBot( const Bot *bot ) const {
 	// First, check all bots...
 	for( Bot *presentBot: bots ) {
 		if( presentBot == bot ) {
-			AI_FailWith( "AiSquad::MayAttachBot()", "Can't attach a bot to the squad (it is already present)\n" );
+			AI_Debug( "AiSquad", "Can't attach a bot to the squad (it is already present)\n" );
+			abort();
 		}
 	}
 #endif

@@ -29,10 +29,12 @@ void AiBaseTeamBrain::Debug( const char *format, ... ) {
 
 AiBaseTeamBrain *AiBaseTeamBrain::GetBrainForTeam( int team ) {
 	if( team < TEAM_PLAYERS || team >= GS_MAX_TEAMS ) {
-		AI_FailWith( "AiBaseTeamBrain", "GetBrainForTeam(): Illegal team %d\n", team );
+		AI_Debug( "AiBaseTeamBrain", "GetBrainForTeam(): Illegal team %d\n", team );
+		abort();
 	}
 	if( !teamBrains[team - 1] ) {
-		AI_FailWith( "AiBaseTeamBrain", "GetBrainForTeam(): Team brain for team %d is not instantiated atm\n", team );
+		AI_Debug( "AiBaseTeamBrain", "GetBrainForTeam(): Team brain for team %d is not instantiated atm\n", team );
+		abort();
 	}
 	return teamBrains[team - 1];
 }

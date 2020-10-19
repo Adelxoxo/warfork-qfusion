@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "ai_local.h"
-
 #ifdef _MSC_VER
 #pragma warning( disable : 4324 )       // structure was padded due to alignment specifier
 #endif
@@ -48,8 +46,11 @@ private:
 	{
 		va_list va;
 		va_start( va, format );
-		AI_FailWithv( "StaticDeque::fail_with()", format, va );
+		vprintf( format, va );
+		// Ensure that all buffered output will be shown
+		fflush( stdout );
 		va_end( va );
+		abort();
 	}
 
 	inline static unsigned next_index( unsigned index ) {

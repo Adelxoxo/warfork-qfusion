@@ -13,7 +13,8 @@ AiAasRouteCache *AiAasRouteCache::shared = nullptr;
 
 void AiAasRouteCache::Init( const AiAasWorld &aasWorld ) {
 	if( shared ) {
-		AI_FailWith( "AiAasRouteCache::Init()", "The shared instance is already present\n" );
+		G_Printf( "AiAasRouteCache::Init(): shared instance is already present\n" );
+		abort();
 	}
 	// AiAasRouteCache is quite large, so it should be allocated on heap
 	shared = (AiAasRouteCache *)G_Malloc( sizeof( AiAasRouteCache ) );
@@ -36,7 +37,8 @@ AiAasRouteCache *AiAasRouteCache::NewInstance() {
 
 void AiAasRouteCache::ReleaseInstance( AiAasRouteCache *instance ) {
 	if( instance == Shared() ) {
-		AI_FailWith( "AiAasRouteCache::ReleaseInstance()", "Attempt to release the shared instance\n" );
+		G_Printf( "AiAasRouteCache::ReleaseInstance() called on shared object\n" );
+		abort();
 	}
 
 	instance->~AiAasRouteCache();
@@ -507,7 +509,8 @@ AiAasRouteCache::FreelistPool::FreelistPool( void *buffer_, unsigned bufferSize,
 	chunksInUse( 0 ) {
 #ifdef _DEBUG
 	if( ( (uintptr_t)buffer ) & 7 ) {
-		AI_FailWith( "FreelistPool::FreelistPool()", "Illegal buffer pointer (should be at least 8-byte-aligned)\n" );
+		G_Printf( "Illegal buffer pointer (should be at least 8-byte-aligned)\n" );
+		abort();
 	}
 #endif
 
@@ -536,11 +539,11 @@ AiAasRouteCache::FreelistPool::FreelistPool( void *buffer_, unsigned bufferSize,
 void *AiAasRouteCache::FreelistPool::Alloc( int size ) {
 #ifdef _DEBUG
 	if( (unsigned)size > chunkSize ) {
-		AI_FailWith( "FreelistPool::Alloc()", "Attempt to allocate more bytes %d than the chunk size %d\n", size, chunkSize );
+		abort();
 	}
 
 	if( !freeChunk ) {
-		AI_FailWith( "FreelistPool::Alloc()", "There are no free chunks left\n" );
+		abort();
 	}
 #endif
 
@@ -560,7 +563,7 @@ void *AiAasRouteCache::FreelistPool::Alloc( int size ) {
 void AiAasRouteCache::FreelistPool::Free( void *ptr ) {
 #ifdef _DEBUG
 	if( !MayOwn( ptr ) ) {
-		AI_FailWith( "FreelistPool::Free()", "Attempt to free a pointer %p not owned by the pool\n", ptr );
+		abort();
 	}
 #endif
 

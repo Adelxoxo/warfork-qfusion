@@ -65,11 +65,11 @@ class alignas ( sizeof( void * ) )PoolBase
 	int16_t listFirst[2];
 
 #ifdef _DEBUG
-	inline const char *ListName( int index ) {
+	inline const char *ListName( short index ) {
 		switch( index ) {
 			case FREE_LIST: return "FREE";
 			case USED_LIST: return "USED";
-			default: AI_FailWith( "PoolBase::ListName()", "Illegal index %d\n", index );
+			default: abort();
 		}
 	}
 #endif

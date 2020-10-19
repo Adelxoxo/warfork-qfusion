@@ -187,7 +187,7 @@ public:
 	inline const Vec3 &AlreadyComputedAngles() const {
 #ifndef PUBLIC_BUILD
 		if( !hasAlreadyComputedAngles ) {
-			AI_FailWith( "BotInput::AlreadyComputedAngles()", "The angles have not been computed yet\n" );
+			abort();
 		}
 #endif
 		return alreadyComputedAngles;
@@ -204,7 +204,7 @@ public:
 		}
 #ifndef PUBLIC_BUILD
 		else if( fabsf( this->intendedLookDir.NormalizeFast() - 1.0f ) > 0.1f ) {
-			AI_FailWith( "BotInput::SetIntendedLookDir()", "The argument is claimed to be normalized but it isn't\n" );
+			abort();
 		}
 #endif
 		this->isLookDirSet = true;
@@ -213,7 +213,7 @@ public:
 	inline const Vec3 &IntendedLookDir() const {
 #ifndef PUBLIC_BUILD
 		if( isLookDirSet ) {
-			AI_FailWith( "BotInput::IntendedLookDir()", "The intended look dir has not been set yet\n" );
+			abort();
 		}
 #endif
 		return intendedLookDir;
@@ -498,11 +498,6 @@ class alignas ( 2 )BotCombatMoveDirsState
 public:
 	static constexpr unsigned short TIMEOUT_PERIOD = 512;
 
-	inline BotCombatMoveDirsState()
-		: timeLeft( 0 ),
-		forwardMove( 0 ),
-		rightMove( 0 ) {}
-
 	inline void Frame( unsigned frameTime ) {
 		timeLeft = ( decltype( timeLeft ) ) std::max( 0, ( (int)timeLeft - (int)frameTime ) );
 	}
@@ -663,24 +658,20 @@ private:
 	bool hasNoFullHeightObstaclesAround;
 
 	template <typename T>
-	static inline void Assert( T condition, const char *message = nullptr ) {
+	static inline void Assert( T condition ) {
 		// There is a define in the source file, we do not want to either expose it to this header
 		// or to move all inlines that use it to the source
 #ifndef PUBLIC_BUILD
 		if( !condition ) {
-			if( message ) {
-				AI_FailWith( "BotEnvironmentTraceCache::Assert()", "%s\n", message );
-			} else {
-				AI_FailWith( "BotEnvironmentTraceCache::Assert()", "An assertion has failed\n" );
-			}
+			abort();
 		}
 #endif
 	}
 
 	// The resultFlag arg is supplied only for assertions check
 	inline const TraceResult &ResultForIndex( unsigned resultFlag, int index ) const {
-		Assert( resultFlag == 1u << index, "The result flag does not match the index" );
-		Assert( resultFlag & this->resultsMask, "A result is not present for the index" );
+		Assert( resultFlag == 1u << index );
+		Assert( resultFlag & this->resultsMask );
 		return results[index];
 	}
 
@@ -1045,10 +1036,10 @@ public:
 
 	void Debug( const char *format, ... ) const;
 	// We want to have a full control over movement code assertions, so use custom ones for this class
-	inline void Assert( bool condition, const char *message = nullptr ) const;
+	inline void Assert( bool condition ) const;
 	template <typename T>
-	inline void Assert( T conditionLikeValue, const char *message = nullptr ) const {
-		Assert( conditionLikeValue != 0, message );
+	inline void Assert( T conditionLikeValue ) const {
+		Assert( conditionLikeValue != 0 );
 	}
 
 	inline float GetRunSpeed() const;
@@ -1163,10 +1154,10 @@ protected:
 
 	void Debug( const char *format, ... ) const;
 	// We want to have a full control over movement code assertions, so use custom ones for this class
-	inline void Assert( bool condition, const char *message = nullptr ) const;
+	inline void Assert( bool condition ) const;
 	template <typename T>
-	inline void Assert( T conditionLikeValue, const char *message = nullptr ) const {
-		Assert( conditionLikeValue != 0, message );
+	inline void Assert( T conditionLikeValue ) const {
+		Assert( conditionLikeValue != 0 );
 	}
 
 	inline bool GenericCheckIsActionEnabled( BotMovementPredictionContext *context,
