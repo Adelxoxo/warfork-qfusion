@@ -141,8 +141,6 @@ class BotBrain : public AiBaseBrain
 		return true;
 	}
 
-	float ComputeEnemyAreasBlockingFactor( const Enemy *enemy, float damageToKillBot, int botBestWeaponTier );
-
 	void UpdateBlockedAreasStatus();
 
 	bool FindDodgeDangerSpot( const Danger &danger, vec3_t spotOrigin );
