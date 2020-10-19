@@ -189,8 +189,6 @@ void AI_JoinedTeam( edict_t *ent, int team ) {
 void AI_CommonFrame() {
 	AiAasWorld::Instance()->Frame();
 
-	EntitiesPvsCache::Instance()->Update();
-
 	NavEntitiesRegistry::Instance()->Update();
 
 	AiManager::Instance()->Update();
