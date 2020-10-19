@@ -52,10 +52,6 @@ class Bot : public Ai
 	friend class BotItemsSelector;
 	friend class BotWeaponSelector;
 	friend class BotRoamingManager;
-	friend class TacticalSpotsRegistry;
-	friend class BotVisitedAreasCache;
-	friend class BotFallbackMovementPath;
-	friend class BotSameFloorClusterAreasCache;
 	friend class BotBaseGoal;
 	friend class BotGrabItemGoal;
 	friend class BotKillEnemyGoal;
@@ -82,7 +78,6 @@ class Bot : public Ai
 	friend class BotGenericRunBunnyingMovementAction;
 	friend class BotBunnyStraighteningReachChainMovementAction;
 	friend class BotBunnyToBestShortcutAreaMovementAction;
-	friend class BotBunnyToBestFloorClusterPointMovementAction;
 	friend class BotBunnyInterpolatingReachChainMovementAction;
 	friend class BotWalkOrSlideInterpolatingReachChainMovementAction;
 	friend class BotCombatDodgeSemiRandomlyToTargetMovementAction;
@@ -222,9 +217,6 @@ public:
 		return entityPhysicsState;
 	}
 
-	// The movement code should use this method if there really are no
-	// feasible ways to continue traveling to the nav target.
-	void OnMovementToNavTargetBlocked();
 protected:
 	virtual void Frame() override;
 	virtual void Think() override;
@@ -322,7 +314,6 @@ private:
 	BotWalkCarefullyMovementAction walkCarefullyMovementAction;
 	BotBunnyStraighteningReachChainMovementAction bunnyStraighteningReachChainMovementAction;
 	BotBunnyToBestShortcutAreaMovementAction bunnyToBestShortcutAreaMovementAction;
-	BotBunnyToBestFloorClusterPointMovementAction bunnyToBestFloorClusterPointMovementAction;
 	BotBunnyInterpolatingReachChainMovementAction bunnyInterpolatingReachChainMovementAction;
 	BotWalkOrSlideInterpolatingReachChainMovementAction walkOrSlideInterpolatingReachChainMovementAction;
 	BotCombatDodgeSemiRandomlyToTargetMovementAction combatDodgeSemiRandomlyToTargetMovementAction;
@@ -377,8 +368,6 @@ private:
 
 	int64_t lastItemSelectedAt;
 	int64_t noItemAvailableSince;
-
-	int64_t lastBlockedNavTargetReportedAt;
 
 	inline bool ShouldUseRoamSpotAsNavTarget() const {
 		const auto &selectedNavEntity = GetSelectedNavEntity();
@@ -568,9 +557,6 @@ public:
 	static constexpr unsigned MAX_SAVED_AREAS = BotMovementPredictionContext::MAX_SAVED_LANDING_AREAS;
 	StaticVector<int, MAX_SAVED_AREAS> savedLandingAreas;
 	StaticVector<int, MAX_SAVED_AREAS> savedPlatformAreas;
-
-	BotFallbackMovementPath fallbackMovementPath;
-	BotVisitedAreasCache visitedAreasCache;
 
 	void CheckTargetProximity();
 

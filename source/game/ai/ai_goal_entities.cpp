@@ -172,11 +172,10 @@ void NavEntitiesRegistry::Init() {
 }
 
 void NavEntitiesRegistry::Update() {
-	const auto *aasWorld = AiAasWorld::Instance();
-	auto *navEntitiesRegistry = NavEntitiesRegistry::Instance();
+	AiAasWorld *aasWorld = AiAasWorld::Instance();
 
-	for( auto it = navEntitiesRegistry->begin(), end = navEntitiesRegistry->end(); it != end; ++it ) {
-		NavEntity *navEnt = *it;
+	FOREACH_NAVENT( navEnt )
+	{
 		if( ( navEnt->flags & NavEntityFlags::MOVABLE ) != NavEntityFlags::NONE ) {
 			navEnt->aasAreaNum = aasWorld->FindAreaNum( navEnt->ent->s.origin );
 		}

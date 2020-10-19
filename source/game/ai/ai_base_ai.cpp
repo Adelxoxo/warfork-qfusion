@@ -15,10 +15,9 @@ Ai::Ai( edict_t *self_,
 	routeCache( routeCache_ ),
 	aasWorld( AiAasWorld::Instance() ),
 	entityPhysicsState( entityPhysicsState_ ),
-	travelFlagsRange( travelFlags, 2 ),
-	blockedTimeoutAt( level.time + 15000 ) {
-	travelFlags[0] = preferredAasTravelFlags_;
-	travelFlags[1] = allowedAasTravelFlags_;
+	allowedAasTravelFlags( allowedAasTravelFlags_ ),
+	preferredAasTravelFlags( preferredAasTravelFlags_ ),
+	blockedTimeout( level.time + 15000 ) {
 	angularViewSpeed[YAW] = yawSpeed;
 	angularViewSpeed[PITCH] = pitchSpeed;
 	angularViewSpeed[ROLL] = 999999.0f;
@@ -49,7 +48,7 @@ bool Ai::IsNavTargetBasedOnEntity( const edict_t *ent ) const {
 }
 
 void Ai::ResetNavigation() {
-	blockedTimeoutAt = level.time + BLOCKED_TIMEOUT;
+	blockedTimeout = level.time + BLOCKED_TIMEOUT;
 }
 
 void Ai::UpdateReachChain( const ReachChainVector &oldReachChain,
@@ -82,9 +81,9 @@ void Ai::UpdateReachChain( const ReachChainVector &oldReachChain,
 
 	int reachNum, travelTime;
 	while( areaNum != goalAreaNum && currReachChain->size() != currReachChain->capacity() ) {
-		if( !routeCache->ReachAndTravelTimeToGoalArea( areaNum, goalAreaNum, travelFlags[0], &reachNum, &travelTime ) ) {
+		if( !routeCache->ReachAndTravelTimeToGoalArea( areaNum, goalAreaNum, preferredAasTravelFlags, &reachNum, &travelTime ) ) {
 			// We hope we'll be pushed in some other area during movement, and goal area will become reachable. Leave as is.
-			if( !routeCache->ReachAndTravelTimeToGoalArea( areaNum, goalAreaNum, travelFlags[1], &reachNum, &travelTime ) ) {
+			if( !routeCache->ReachAndTravelTimeToGoalArea( areaNum, goalAreaNum, allowedAasTravelFlags, &reachNum, &travelTime ) ) {
 				break;
 			}
 		}
@@ -193,11 +192,11 @@ void Ai::Think() {
 		}
 
 		if( checkBlocked && VectorLengthSquared( self->velocity ) > 30 * 30 ) {
-			blockedTimeoutAt = level.time + BLOCKED_TIMEOUT;
+			blockedTimeout = level.time + BLOCKED_TIMEOUT;
 		}
 
 		// if completely stuck somewhere
-		if( blockedTimeoutAt < level.time ) {
+		if( blockedTimeout < level.time ) {
 			OnBlockedTimeout();
 			return;
 		}
