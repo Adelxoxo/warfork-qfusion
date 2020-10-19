@@ -157,12 +157,8 @@ public:
 
 	void Set( const Enemy *primaryEnemy_,
 			  unsigned timeoutPeriod,
-			  const Enemy **activeEnemiesBegin,
-			  const Enemy **activeEnemiesEnd );
-
-	void Set( const Enemy *primaryEnemy_,
-			  unsigned timeoutPeriod,
-			  const Enemy *firstActiveEnemy );
+			  const Enemy *const *activeEnemiesBegin,
+			  const Enemy *const *activeEnemiesEnd );
 
 	inline unsigned InstanceId() const { return instanceId; }
 
@@ -176,7 +172,7 @@ public:
 
 	Vec3 LastSeenOrigin() const {
 		CheckValid( __FUNCTION__ );
-		return primaryEnemy->LastSeenOrigin();
+		return primaryEnemy->LastSeenPosition();
 	}
 
 	Vec3 ActualOrigin() const {

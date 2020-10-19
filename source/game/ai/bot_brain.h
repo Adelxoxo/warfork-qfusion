@@ -185,6 +185,9 @@ protected:
 		bool CheckHasShell() const override { return ::HasShell( bot ); }
 		float ComputeDamageToBeKilled() const override { return DamageToKill( bot ); }
 		void OnEnemyRemoved( const Enemy *enemy ) override;
+		void TryPushNewEnemy( const edict_t *enemy, const float *suggestedOrigin ) override {
+			TryPushEnemyOfSingleBot( bot, enemy, suggestedOrigin );
+		}
 		void SetBotRoleWeight( const edict_t *bot_, float weight ) override {}
 		float GetAdditionalEnemyWeight( const edict_t *bot_, const edict_t *enemy ) const override { return 0; }
 		void OnBotEnemyAssigned( const edict_t *bot_, const Enemy *enemy ) override {}
@@ -230,6 +233,8 @@ public:
 	void OnNewThreat( const edict_t *newThreat, const AiFrameAwareUpdatable *threatDetector );
 	void OnEnemyRemoved( const Enemy *enemy );
 
+	inline unsigned MaxTrackedEnemies() const { return botEnemyPool.MaxTrackedEnemies(); }
+
 	void OnEnemyViewed( const edict_t *enemy );
 	void OnEnemyOriginGuessed( const edict_t *enemy, unsigned minMillisSinceLastSeen, const float *guessedOrigin = nullptr );
 
@@ -241,10 +246,10 @@ public:
 
 	// In these calls use not active but bot's own enemy pool
 	// (this behaviour is expected by callers, otherwise referring to a squad enemy pool is enough)
-	inline int64_t LastAttackedByTime( const edict_t *attacker ) const {
+	inline unsigned LastAttackedByTime( const edict_t *attacker ) const {
 		return botEnemyPool.LastAttackedByTime( attacker );
 	}
-	inline int64_t LastTargetTime( const edict_t *target ) const {
+	inline unsigned LastTargetTime( const edict_t *target ) const {
 		return botEnemyPool.LastTargetTime( target );
 	}
 

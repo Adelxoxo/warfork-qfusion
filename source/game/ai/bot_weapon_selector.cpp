@@ -13,8 +13,8 @@ bool SelectedEnemies::AreValid() const {
 
 void SelectedEnemies::Set( const Enemy *primaryEnemy_,
 						   unsigned timeoutPeriod,
-						   const Enemy **activeEnemiesBegin,
-						   const Enemy **activeEnemiesEnd ) {
+						   const Enemy * const *activeEnemiesBegin,
+						   const Enemy * const *activeEnemiesEnd ) {
 	this->primaryEnemy = primaryEnemy_;
 	this->timeoutAt = level.time + timeoutPeriod;
 
@@ -24,39 +24,21 @@ void SelectedEnemies::Set( const Enemy *primaryEnemy_,
 	}
 #endif
 
-	for( const Enemy **enemy = activeEnemiesBegin; enemy != activeEnemiesEnd; ++enemy ) {
-		this->activeEnemies.push_back( *enemy );
-	}
-}
-
-void SelectedEnemies::Set( const Enemy *primaryEnemy_,
-						   unsigned timeoutPeriod,
-						   const Enemy *firstActiveEnemy ) {
-	this->primaryEnemy = primaryEnemy_;
-	this->timeoutAt = level.time + timeoutPeriod;
-
-#ifndef _DEBUG
-	if( !activeEnemies.empty() ) {
-		AI_FailWith( "SelectedEnemies::Set()", "activeEnemies.size() %d > 0", activeEnemies.size() );
-	}
-#endif
-
-	for( const Enemy *enemy = firstActiveEnemy; enemy; enemy = enemy->NextInActiveList() ) {
-		this->activeEnemies.push_back( enemy );
-	}
+	for( const Enemy *const *iter = activeEnemiesBegin; iter != activeEnemiesEnd; ++iter )
+		this->activeEnemies.push_back( *iter );
 }
 
 Vec3 SelectedEnemies::ClosestEnemyOrigin( const vec3_t relativelyTo ) const {
 	const Enemy *closestEnemy = nullptr;
 	float minSquareDistance = std::numeric_limits<float>::max();
 	for( const Enemy *enemy: activeEnemies ) {
-		float squareDistance = enemy->LastSeenOrigin().SquareDistanceTo( relativelyTo );
+		float squareDistance = enemy->LastSeenPosition().SquareDistanceTo( relativelyTo );
 		if( minSquareDistance > squareDistance ) {
 			minSquareDistance = squareDistance;
 			closestEnemy = enemy;
 		}
 	}
-	return closestEnemy->LastSeenOrigin();
+	return closestEnemy->LastSeenPosition();
 }
 
 float SelectedEnemies::DamageToKill() const {
@@ -237,7 +219,7 @@ float SelectedEnemies::MaxDotProductOfBotViewAndDirToEnemy() const {
 
 	float maxDot = -1.0f;
 	for( const Enemy *enemy: activeEnemies ) {
-		Vec3 toEnemyDir( enemy->LastSeenOrigin() );
+		Vec3 toEnemyDir( enemy->LastSeenPosition() );
 		toEnemyDir -= self->s.origin;
 		toEnemyDir.NormalizeFast();
 		float dot = toEnemyDir.Dot( botViewDir );
@@ -252,7 +234,7 @@ float SelectedEnemies::MaxDotProductOfEnemyViewAndDirToBot() const {
 	float maxDot = -1.0f;
 	for( const Enemy *enemy: activeEnemies ) {
 		Vec3 toBotDir( self->s.origin );
-		toBotDir -= enemy->LastSeenOrigin();
+		toBotDir -= enemy->LastSeenPosition();
 		toBotDir.NormalizeFast();
 		float dot = toBotDir.Dot( enemy->LookDir() );
 		if( dot > maxDot ) {

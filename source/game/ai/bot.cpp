@@ -382,7 +382,7 @@ void Bot::UpdateKeptInFovPoint() {
 			lastChosenLostOrHiddenEnemyInstanceId++;
 		}
 
-		Vec3 origin( lostOrHiddenEnemy->LastSeenOrigin() );
+		Vec3 origin( lostOrHiddenEnemy->LastSeenPosition() );
 		if( !GetMiscTactics().shouldKeepXhairOnEnemy ) {
 			float distanceThreshold = 384.0f;
 			if( lostOrHiddenEnemy->ent ) {
