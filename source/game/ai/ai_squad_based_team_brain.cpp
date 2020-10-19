@@ -673,12 +673,12 @@ bool AiSquad::ShouldNotDropItemsNow() const {
 
 		float directionFactor = enemyToSquadCenterDir.Dot( enemyVelocityDir );
 		if( directionFactor < 0 ) {
-			if( BoundsOverlapSphere( mins, maxs, extrapolatedLastSeenPosition.Data(), 192.0f ) ) {
+			if( BoundsAndSphereIntersect( mins, maxs, extrapolatedLastSeenPosition.Data(), 192.0f ) ) {
 				potentialStealers.push_back( PotentialStealer( enemy, extrapolatedLastSeenPosition ) );
 			}
 		} else {
 			float radius = 192.0f + extrapolationSeconds * enemySpeed * directionFactor;
-			if( BoundsOverlapSphere( mins, maxs, extrapolatedLastSeenPosition.Data(), radius ) ) {
+			if( BoundsAndSphereIntersect( mins, maxs, extrapolatedLastSeenPosition.Data(), radius ) ) {
 				potentialStealers.push_back( PotentialStealer( enemy, extrapolatedLastSeenPosition ) );
 			}
 		}

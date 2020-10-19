@@ -446,7 +446,7 @@ bool Bot::CheckShot( const AimParams &aimParams,
 				}
 
 				float radius = 1.0f + factor * 64.0f;
-				return BoundsOverlapSphere( absMins.Data(), absMaxs.Data(), tr.endpos, radius );
+				return BoundsAndSphereIntersect( absMins.Data(), absMaxs.Data(), tr.endpos, radius );
 			}
 		}
 	}
