@@ -102,9 +102,6 @@ public:
 			int numEntities;
 			vec3_t botOrigin;
 			float radius;
-
-			// Shut an analyzer up
-			NearbyEntitiesCacheEntry() : numEntities( 0 ), radius( 0 ) {}
 		};
 
 private:

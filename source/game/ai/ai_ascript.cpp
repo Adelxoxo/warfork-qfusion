@@ -1657,7 +1657,7 @@ protected:
         return nullptr;
     }
 public:
-    inline ASUntypedFunction(const char *decl_, ASFunctionsRegistry &registry): decl(decl_), funcPtr(nullptr)
+    inline ASUntypedFunction(const char *decl_, ASFunctionsRegistry &registry): decl(decl_)
     {
         registry.Register(*this);
     }

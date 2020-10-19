@@ -256,18 +256,7 @@ struct PlannerNode : PoolItem {
 	uint32_t worldStateHash;
 
 	inline PlannerNode( PoolBase *pool, edict_t *self )
-		: PoolItem( pool ),
-		worldState( self ),
-		actionRecord( nullptr ),
-		parent( nullptr ),
-		nextTransition( nullptr ),
-		transitionCost( std::numeric_limits<float>::max() ),
-		costSoFar( std::numeric_limits<float>::max() ),
-		heapCost( std::numeric_limits<float>::max() ),
-		heapArrayIndex( ~0u ),
-		prevInHashBin( nullptr ),
-		nextInHashBin( nullptr ),
-		worldStateHash( 0 ) {}
+		: PoolItem( pool ), worldState( self ) {}
 
 	~PlannerNode() override {
 		if( actionRecord ) {

@@ -7,11 +7,6 @@ float NavEntity::CostInfluence() const {
 		return 0.5f;
 	}
 
-	// Make this local copy to shorten lines.
-	// Cast a enum value to int in comparisons to avoid analyzer warnings
-	// (different enum types are used for comparison).
-	const int itemTag = ent->item->tag;
-
 	// Cost influence is not a weight.
 	// Cost influence separates different classes of items, not items itself.
 	// For two items of the same cost class costs should match and weights may (and usually) no.
@@ -21,9 +16,9 @@ float NavEntity::CostInfluence() const {
 		case IT_POWERUP:
 			return 0.6f;
 		case IT_ARMOR:
-			return ( itemTag != (int)ARMOR_SHARD ) ? 0.7f : 0.9f;
+			return ( ent->item->tag != ARMOR_SHARD ) ? 0.7f : 0.9f;
 		case IT_HEALTH:
-			return ( itemTag == (int)HEALTH_MEGA || itemTag == (int)HEALTH_ULTRA ) ? 0.7f : 0.9f;
+			return ( ent->item->tag == HEALTH_MEGA || ent->item->tag == HEALTH_ULTRA ) ? 0.7f : 0.9f;
 		case IT_WEAPON:
 			return 0.8f;
 		case IT_AMMO:
@@ -43,21 +38,15 @@ bool NavEntity::IsTopTierItem( const float *overriddenEntityWeights ) const {
 		return overriddenEntityWeights && overriddenEntityWeights[ENTNUM( ent )] >= 2.0f;
 	}
 
-	// Make these local copies to shorten lines.
-	const auto itemType = ent->item->type;
-	// Cast a enum value to int in comparisons to avoid analyzer warnings
-	// (different enum types are used for comparison).
-	const int itemTag = ent->item->tag;
-
-	if( itemType == IT_POWERUP ) {
+	if( ent->item->type == IT_POWERUP ) {
 		return true;
 	}
 
-	if( itemType == IT_HEALTH && ( itemTag == (int)HEALTH_MEGA || itemTag == (int)HEALTH_ULTRA ) ) {
+	if( ent->item->type == IT_HEALTH && ( ent->item->tag == HEALTH_MEGA || ent->item->tag == HEALTH_ULTRA ) ) {
 		return true;
 	}
 
-	if( itemType == IT_ARMOR && ( itemTag == (int)ARMOR_RA || itemTag == (int)ARMOR_YA ) ) {
+	if( ent->item->type == IT_ARMOR && ( ent->item->tag == ARMOR_RA || ent->item->tag == ARMOR_YA ) ) {
 		return true;
 	}
 
@@ -95,28 +84,22 @@ uint64_t NavEntity::MaxWaitDuration() const {
 		return std::numeric_limits<uint64_t>::max();
 	}
 
-	// Make these local copies to shorten lines.
-	const auto itemType = ent->item->type;
-	// Cast a enum value to int in comparisons to avoid analyzer warnings
-	// (different enum types are used for comparison).
-	const int itemTag = ent->item->tag;
-
-	if( itemType == IT_POWERUP ) {
+	if( ent->item->type == IT_POWERUP ) {
 		return 9000;
 	}
 
-	if( itemType == IT_HEALTH && ( itemTag == (int)HEALTH_MEGA || itemTag == (int)HEALTH_ULTRA ) ) {
+	if( ent->item->type == IT_HEALTH && ( ent->item->tag == HEALTH_MEGA || ent->item->tag == HEALTH_ULTRA ) ) {
 		return 6000;
 	}
 
-	if( itemType == IT_ARMOR ) {
-		if( itemTag == (int)ARMOR_RA ) {
+	if( ent->item->type == IT_ARMOR ) {
+		if( ent->item->tag == ARMOR_RA ) {
 			return 6000;
 		}
-		if( itemTag == (int)ARMOR_YA ) {
+		if( ent->item->tag == ARMOR_YA ) {
 			return 5000;
 		}
-		if( itemTag == (int)ARMOR_GA ) {
+		if( ent->item->tag == ARMOR_GA ) {
 			return 4000;
 		}
 	}

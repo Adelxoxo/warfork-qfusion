@@ -448,25 +448,15 @@ inline BotEnvironmentTraceCache &BotMovementPredictionContext::EnvironmentTraceC
 typedef BotEnvironmentTraceCache::ObstacleAvoidanceResult ObstacleAvoidanceResult;
 
 inline ObstacleAvoidanceResult BotMovementPredictionContext::TryAvoidFullHeightObstacles( float correctionFraction ) {
-	// Make a modifiable copy of the intended look dir
 	Vec3 intendedLookVec( this->record->botInput.IntendedLookDir() );
-	auto result = EnvironmentTraceCache().TryAvoidFullHeightObstacles( this, &intendedLookVec, correctionFraction );
-	if( result == ObstacleAvoidanceResult::CORRECTED ) {
-		// Write the modified intended look dir back in this case
-		this->record->botInput.SetIntendedLookDir( intendedLookVec );
-	}
-	return result;
+	return EnvironmentTraceCache().TryAvoidFullHeightObstacles( this, &intendedLookVec, correctionFraction );
+	this->record->botInput.SetIntendedLookDir( intendedLookVec );
 }
 
 inline ObstacleAvoidanceResult BotMovementPredictionContext::TryAvoidJumpableObstacles( float correctionFraction ) {
-	// Make a modifiable copy of the intended look dir
 	Vec3 intendedLookVec( this->record->botInput.IntendedLookDir() );
-	auto result = EnvironmentTraceCache().TryAvoidJumpableObstacles( this, &intendedLookVec, correctionFraction );
-	if( result == ObstacleAvoidanceResult::CORRECTED ) {
-		// Write the modified intended look dir back in this case
-		this->record->botInput.SetIntendedLookDir( intendedLookVec );
-	}
-	return result;
+	return EnvironmentTraceCache().TryAvoidJumpableObstacles( this, &intendedLookVec, correctionFraction );
+	this->record->botInput.SetIntendedLookDir( intendedLookVec );
 }
 
 static void Intercepted_PredictedEvent( int entNum, int ev, int parm ) {
@@ -2902,9 +2892,7 @@ struct ReachChainInterpolator {
 
 	inline ReachChainInterpolator()
 		: intendedLookDir( 0, 0, 0 ),
-		compatibleReachTypes( nullptr ),
 		numCompatibleReachTypes( 0 ),
-		allowedEndReachTypes( nullptr ),
 		numAllowedEndReachTypes( 0 ),
 		stopAtDistance( 256 )
 	{}
@@ -3002,7 +2990,6 @@ bool ReachChainInterpolator::Exec( BotMovementPredictionContext *context ) {
 		}
 
 		intendedLookDir += reachDir;
-		numReachFound++;
 	}
 
 	if( !numReachFound ) {
@@ -3371,9 +3358,7 @@ AreaAndScore *BotBunnyStraighteningReachChainMovementAction::SelectCandidateArea
 		// Give far areas greater initial score
 		float score = 999999.0f;
 		if( areaNum != navTargetAasAreaNum ) {
-			// Avoid a division by zero by shifting both nominator and denominator by 1.
-			// Note that it slightly shifts score too but there are no upper bounds for the score.
-			score = 0.5f + 0.5f * ( (float)( i + 1 ) / (float)( lastValidReachIndex + 1 ) );
+			score = 0.5f + 0.5f * ( (float) i / (float) lastValidReachIndex );
 			// Try skip "junk" areas (sometimes these areas cannot be avoided in the shortest path)
 			if( areaFlags & AREA_JUNK ) {
 				score *= 0.1f;
@@ -4406,6 +4391,11 @@ void BotGenericRunBunnyingMovementAction::CheckPredictionStepResults( BotMovemen
 		}
 	}
 
+	// Can't test for reachability after tracing
+	if( !currTravelTimeToNavTarget ) {
+		context->SaveSuggestedActionForNextFrame( this );
+		return;
+	}
 	Assert( context->NavTargetAasAreaNum() );
 
 	// We might wait for landing, but it produces bad results

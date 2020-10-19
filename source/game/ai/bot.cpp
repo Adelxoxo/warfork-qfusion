@@ -675,8 +675,6 @@ void Bot::GhostingFrame() {
 
 void Bot::CallGhostingClientThink( const BotInput &input ) {
 	usercmd_t ucmd;
-	// Shut an analyzer up
-	memset( &ucmd, 0, sizeof( usercmd_t ) );
 	input.CopyToUcmd( &ucmd );
 	// set approximate ping and show values
 	ucmd.serverTimeStamp = game.serverTime;
@@ -750,8 +748,6 @@ void Bot::ActiveFrame() {
 
 void Bot::CallActiveClientThink( const BotInput &input ) {
 	usercmd_t ucmd;
-	// Shut an analyzer up
-	memset( &ucmd, 0, sizeof( usercmd_t ) );
 	input.CopyToUcmd( &ucmd );
 
 	//set up for pmove

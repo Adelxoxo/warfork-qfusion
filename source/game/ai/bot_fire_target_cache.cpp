@@ -17,7 +17,6 @@ public:
 	// These following move-related members are mandatory for intended BitVectorHolder behavior
 
 	FixedBitVector( FixedBitVector &&that ) {
-		size = that.size;
 		words = that.words;
 		that.words = nullptr;
 	}
@@ -26,7 +25,6 @@ public:
 		if( words ) {
 			G_Free( words );
 		}
-		size = that.size;
 		words = that.words;
 		that.words = nullptr;
 		return *this;
@@ -206,16 +204,12 @@ void BotFireTargetCache::AdjustAimParams( const SelectedEnemies &selectedEnemies
 	switch( fireDef.AimType() ) {
 		case AI_WEAPON_AIM_TYPE_PREDICTION_EXPLOSIVE:
 			AdjustPredictionExplosiveAimTypeParams( selectedEnemies, selectedWeapons, fireDef, aimParams );
-			break;
 		case AI_WEAPON_AIM_TYPE_PREDICTION:
 			AdjustPredictionAimTypeParams( selectedEnemies, selectedWeapons, fireDef, aimParams );
-			break;
 		case AI_WEAPON_AIM_TYPE_DROP:
 			AdjustDropAimTypeParams( selectedEnemies, selectedWeapons, fireDef, aimParams );
-			break;
 		default:
 			AdjustInstantAimTypeParams( selectedEnemies, selectedWeapons, fireDef, aimParams );
-			break;
 	}
 }
 

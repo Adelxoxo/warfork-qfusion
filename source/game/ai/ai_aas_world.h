@@ -181,8 +181,7 @@ typedef struct aas_node_s {
 class AiAasWorld
 {
 	bool loaded = false;
-	// Should be released by G_LevelFree();
-	char *checksum = nullptr;
+	unsigned char checksum[128];
 
 	//bounding boxes
 	int numbboxes;
