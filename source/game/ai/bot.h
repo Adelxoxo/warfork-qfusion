@@ -2,7 +2,7 @@
 #define AI_BOT_H
 
 #include "static_vector.h"
-#include "bot_perception_manager.h"
+#include "ai_dangers_detector.h"
 #include "bot_brain.h"
 #include "ai_base_ai.h"
 #include "vec3.h"
@@ -47,7 +47,6 @@ class Bot : public Ai
 	friend class BotBrain;
 	friend class AiSquad;
 	friend class AiBaseEnemyPool;
-	friend class BotPerceptionManager;
 	friend class BotFireTargetCache;
 	friend class BotItemsSelector;
 	friend class BotWeaponSelector;
@@ -226,10 +225,12 @@ protected:
 	virtual void TouchedOtherEntity( const edict_t *entity ) override;
 
 private:
+	void RegisterVisibleEnemies();
+
 	inline bool IsPrimaryAimEnemy( const edict_t *enemy ) const { return botBrain.IsPrimaryAimEnemy( enemy ); }
 
 	BotWeightConfig weightConfig;
-	BotPerceptionManager perceptionManager;
+	DangersDetector dangersDetector;
 	BotBrain botBrain;
 
 	float skillLevel;
@@ -336,7 +337,7 @@ private:
 	static constexpr unsigned MAX_ALERT_SPOTS = 3;
 	StaticVector<AlertSpot, MAX_ALERT_SPOTS> alertSpots;
 
-	void CheckAlertSpots( const StaticVector<uint16_t, MAX_CLIENTS> &visibleTargets );
+	void CheckAlertSpots( const StaticVector<edict_t *, MAX_CLIENTS> &visibleTargets );
 
 	static constexpr unsigned MAX_SCRIPT_WEAPONS = 3;
 
