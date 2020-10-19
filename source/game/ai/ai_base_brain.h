@@ -20,14 +20,13 @@ protected:
 	edict_t *self;
 	const char *name;
 	const unsigned updatePeriod;
-	int debugColor;
 
 	float weight;
 
 public:
 	// Don't pass self as a constructor argument (self->ai ptr might not been set yet)
 	inline AiBaseGoal( Ai *ai, const char *name_, unsigned updatePeriod_ )
-		: self( ai->self ), name( name_ ), updatePeriod( updatePeriod_ ), debugColor( 0 ), weight( 0.0f ) {
+		: self( ai->self ), name( name_ ), updatePeriod( updatePeriod_ ), weight( 0.0f ) {
 		Register( ai, this );
 	}
 
@@ -46,8 +45,6 @@ public:
 	inline bool operator<( const AiBaseGoal &that ) const {
 		return this->weight > that.weight;
 	}
-
-	inline int DebugColor() const { return debugColor; }
 
 	inline const char *Name() const { return name; }
 	inline unsigned UpdatePeriod() const { return updatePeriod; }

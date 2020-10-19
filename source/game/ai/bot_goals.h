@@ -8,10 +8,8 @@ class BotBaseGoal : public AiBaseGoal
 	StaticVector<AiBaseAction *, AiBaseBrain::MAX_ACTIONS> extraApplicableActions;
 
 public:
-	BotBaseGoal( Ai *ai_, const char *name_, int debugColor_, unsigned updatePeriod_ )
-		: AiBaseGoal( ai_, name_, updatePeriod_ ) {
-		this->debugColor = debugColor_;
-	}
+	BotBaseGoal( Ai *ai_, const char *name_, unsigned updatePeriod_ )
+		: AiBaseGoal( ai_, name_, updatePeriod_ ) {}
 
 	inline void AddExtraApplicableAction( AiBaseAction *action ) {
 		extraApplicableActions.push_back( action );
@@ -28,7 +26,7 @@ protected:
 class BotGrabItemGoal : public BotBaseGoal
 {
 public:
-	BotGrabItemGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotGrabItemGoal", COLOR_RGB( 0, 255, 0 ), 950 ) {}
+	BotGrabItemGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotGrabItemGoal", 500 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -38,7 +36,7 @@ public:
 class BotKillEnemyGoal : public BotBaseGoal
 {
 public:
-	BotKillEnemyGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotKillEnemyGoal", COLOR_RGB( 255, 0, 0 ), 1250 ) {}
+	BotKillEnemyGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotKillEnemyGoal", 400 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -48,7 +46,7 @@ public:
 class BotRunAwayGoal : public BotBaseGoal
 {
 public:
-	BotRunAwayGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotRunAwayGoal", COLOR_RGB( 0, 0, 255 ), 950 ) {}
+	BotRunAwayGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotRunAwayGoal", 550 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -61,7 +59,7 @@ class BotAttackOutOfDespairGoal : public BotBaseGoal
 
 public:
 	BotAttackOutOfDespairGoal( Ai *ai_ )
-		: BotBaseGoal( ai_, "BotAttackOutOfDespairGoal", COLOR_RGB( 192, 192, 0 ), 750 ),
+		: BotBaseGoal( ai_, "BotAttackOutOfDespairGoal", 400 ),
 		oldOffensiveness( 1.0f ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
@@ -75,7 +73,7 @@ public:
 class BotReactToDangerGoal : public BotBaseGoal
 {
 public:
-	BotReactToDangerGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToDangerGoal", COLOR_RGB( 192, 0, 192 ), 750 ) {}
+	BotReactToDangerGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToDangerGoal", 350 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -85,7 +83,7 @@ public:
 class BotReactToThreatGoal : public BotBaseGoal
 {
 public:
-	BotReactToThreatGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToThreatGoal", COLOR_RGB( 255, 0, 128 ), 350 ) {}
+	BotReactToThreatGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToThreatGoal", 350 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -95,7 +93,7 @@ public:
 class BotReactToEnemyLostGoal : public BotBaseGoal
 {
 public:
-	BotReactToEnemyLostGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToEnemyLostGoal", COLOR_RGB( 0, 192, 192 ), 950 ) {}
+	BotReactToEnemyLostGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotReactToEnemyLostGoal", 400 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -105,7 +103,7 @@ public:
 class BotRoamGoal : public BotBaseGoal
 {
 public:
-	BotRoamGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotRoamGoal", COLOR_RGB( 0, 0, 80 ), 400 ) {}
+	BotRoamGoal( Ai *ai_ ) : BotBaseGoal( ai_, "BotRoamGoal", 400 ) {}
 
 	void UpdateWeight( const WorldState &currWorldState ) override;
 	void GetDesiredWorldState( WorldState *worldState ) override;
@@ -117,9 +115,8 @@ class BotScriptGoal : public BotBaseGoal
 	void *scriptObject;
 
 public:
-	// TODO: Provide ways for setting the debug color for this kind of goals
 	BotScriptGoal( Ai *ai_, const char *name_, unsigned updatePeriod_, void *scriptObject_ )
-		: BotBaseGoal( ai_, name_, 0, updatePeriod_ ),
+		: BotBaseGoal( ai_, name_, updatePeriod_ ),
 		scriptObject( scriptObject_ ) {}
 
 	// Exposed for script API

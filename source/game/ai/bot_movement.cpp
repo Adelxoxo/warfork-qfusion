@@ -1129,14 +1129,14 @@ void BotMovementPredictionContext::NextMovementStep() {
 
 	// Make sure we're modify botInput/entityPhysicsState before copying to ucmd
 
-	// Corresponds to Bot::Think();
+	// Simulate Bot::Think();
 	self->ai->botRef->ApplyPendingTurnToLookAtPoint( botInput, this );
-	// Corresponds to Bot::MovementFrame();
+	// Simulate Bot::MovementFrame();
 	this->activeAction->ExecActionRecord( this->record, botInput, this );
-	// Corresponds to Bot::Think();
+	// Simulate Bot::Think();
 	self->ai->botRef->ApplyInput( botInput, this );
 
-	// ExecActionRecord() call in SimulateMockBotFrame() might fail or complete the planning execution early.
+	// ExecActionRecord() might fail or complete the planning execution early.
 	// Do not call PMove() in these cases
 	if( this->cannotApplyAction || this->isCompleted ) {
 		return;
@@ -1377,15 +1377,7 @@ void BotBaseMovementAction::ExecActionRecord( const BotMovementActionRecord *rec
 											  BotInput *inputWillBeUsed,
 											  BotMovementPredictionContext *context ) {
 	Assert( inputWillBeUsed );
-	// TODO: Discover why we still need to do that for pending look at points
-	// while the pending look at points seemingly gets applied in SimulateMockBotFrame()
-	if( inputWillBeUsed->hasAlreadyComputedAngles ) {
-		Vec3 angles( inputWillBeUsed->AlreadyComputedAngles() );
-		*inputWillBeUsed = record->botInput;
-		inputWillBeUsed->SetAlreadyComputedAngles( angles );
-	} else {
-		*inputWillBeUsed = record->botInput;
-	}
+	*inputWillBeUsed = record->botInput;
 
 	if( context ) {
 		if( record->hasModifiedVelocity ) {
