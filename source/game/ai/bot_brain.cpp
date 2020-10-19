@@ -393,7 +393,7 @@ void BotBrain::PrepareCurrWorldState( WorldState *worldState ) {
 		worldState->EnemyHasGoodFarRangeWeaponsVar().SetValue( selectedEnemies.HaveGoodFarRangeWeapons() );
 		worldState->EnemyHasGoodMiddleRangeWeaponsVar().SetValue( selectedEnemies.HaveGoodMiddleRangeWeapons() );
 		worldState->EnemyHasGoodCloseRangeWeaponsVar().SetValue( selectedEnemies.HaveGoodCloseRangeWeapons() );
-		worldState->EnemyCanHitVar().SetValue( selectedEnemies.CanHit() );
+		worldState->EnemyCanHitVar().SetValue( selectedEnemies.CanHit( self ) );
 	} else {
 		worldState->EnemyOriginVar().SetIgnore( true );
 		worldState->HasThreateningEnemyVar().SetIgnore( true );
@@ -410,13 +410,14 @@ void BotBrain::PrepareCurrWorldState( WorldState *worldState ) {
 		worldState->IsReactingToEnemyLostVar().SetValue( false );
 		worldState->HasReactedToEnemyLostVar().SetValue( false );
 		worldState->LostEnemyLastSeenOriginVar().SetValue( lostEnemies.LastSeenOrigin() );
-		worldState->MightSeeLostEnemyAfterTurnVar().SetValue( false );
-		if( EntitiesPvsCache::Instance()->AreInPvs( self, lostEnemies.TraceKey() ) ) {
-			trace_t trace;
-			G_Trace( &trace, self->s.origin, nullptr, nullptr, lostEnemies.ActualOrigin().Data(), self, MASK_AISOLID );
-			if( trace.fraction == 1.0f || game.edicts + trace.ent == lostEnemies.TraceKey() ) {
-				worldState->MightSeeLostEnemyAfterTurnVar().SetValue( true );
-			}
+		trace_t trace;
+		G_Trace( &trace, self->s.origin, nullptr, nullptr, lostEnemies.ActualOrigin().Data(), self, MASK_AISOLID );
+		if( trace.fraction == 1.0f ) {
+			worldState->MightSeeLostEnemyAfterTurnVar().SetValue( true );
+		} else if( game.edicts + trace.ent == lostEnemies.TraceKey() ) {
+			worldState->MightSeeLostEnemyAfterTurnVar().SetValue( true );
+		} else {
+			worldState->MightSeeLostEnemyAfterTurnVar().SetValue( false );
 		}
 	} else {
 		worldState->IsReactingToEnemyLostVar().SetIgnore( true );
