@@ -126,7 +126,6 @@ class BotBrain : public AiBaseBrain
 	const NavEntity *prevSelectedNavEntity;
 
 	const SelectedNavEntity &GetOrUpdateSelectedNavEntity();
-	void ForceSetNavEntity( const SelectedNavEntity &selectedNavEntity_ );
 
 	inline bool HasJustPickedGoalItem() const {
 		if( lastNavTargetReachedAt < prevThinkAt ) {
