@@ -716,6 +716,8 @@ void Bot::Think() {
 		return;
 	}
 
+	perceptionManager.Frame();
+
 	UpdateKeptInFovPoint();
 
 	if( CanChangeWeapons() ) {
@@ -746,9 +748,6 @@ void Bot::ActiveFrame() {
 	}
 
 	CheckBlockingDueToInputRotation();
-
-	// Always calls Frame() and calls Think() if needed
-	perceptionManager.Update();
 
 	weaponsSelector.Frame( botBrain.cachedWorldState );
 
