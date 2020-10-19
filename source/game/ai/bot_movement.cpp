@@ -2742,7 +2742,7 @@ void BotDummyMovementAction::SetupFallbackMovement( BotMovementPredictionContext
 	}
 
 	// If a dash cannot be performed, try jumping
-	if( pmStats[PM_STAT_DASHTIME] ) {
+	if( pmStats[PM_STAT_DASHTIME] || pmStats[PM_STAT_STUN] ) {
 		// Don't check jump time (we rely on autohop)
 		if( pmStats[PM_STAT_FEATURES] & PMFEAT_JUMP ) {
 			botInput->SetUpMovement( 1 );
@@ -4978,7 +4978,7 @@ void BotGenericRunBunnyingMovementAction::SetupCommonBunnyingInput( BotMovementP
 	botInput->canOverrideLookVec = hitWhileRunningTestResult.canHitAsIs;
 	botInput->canOverridePitch = true;
 
-	if( ( pmoveStats[PM_STAT_FEATURES] & PMFEAT_DASH ) && !pmoveStats[PM_STAT_DASHTIME] ) {
+	if( ( pmoveStats[PM_STAT_FEATURES] & PMFEAT_DASH ) && !pmoveStats[PM_STAT_DASHTIME] && !pmoveStats[PM_STAT_STUN] ) {
 		bool shouldDash = false;
 		if( entityPhysicsState.Speed() < context->GetDashSpeed() && entityPhysicsState.GroundEntity() ) {
 			// Prevent dashing into obstacles
@@ -6163,7 +6163,7 @@ void BotCombatDodgeSemiRandomlyToTargetMovementAction::PlanPredictionStep( BotMo
 			if( pmStats[PM_STAT_FEATURES] & PMFEAT_DASH ) {
 				const float speedThreshold = context->GetDashSpeed() - 10;
 				if( entityPhysicsState.Speed() < speedThreshold ) {
-					if( !pmStats[PM_STAT_DASHTIME] ) {
+					if( !pmStats[PM_STAT_DASHTIME] && !pmStats[PM_STAT_STUN] ) {
 						botInput->SetSpecialButton( true );
 						context->predictionStepMillis = 16;
 					}
