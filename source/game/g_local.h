@@ -1093,7 +1093,7 @@ edict_t	*G_PlayerTrail_LastSpot (void);
 
 //============================================================================
 
-#include "g_botai.h"
+#include "ai/ai.h"
 
 typedef struct {
 	int radius;
